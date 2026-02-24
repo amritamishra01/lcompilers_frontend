@@ -64,14 +64,13 @@ export default function Home() {
             handleUserTabChange("STDOUT");
         }
     }, [moduleReady, dataFetch]);
-
     // Step 2: Jump Handler to be passed to ResultBox
-    const jumpToEditorLine = (line) => {
+    const jumpToEditorLine = (rangeData) => {
         
-        // Use jumpToLine (the API we exposed in Editor.js)
-        if (editorRef.current && typeof editorRef.current.jumpToLine === 'function') {
-            editorRef.current.jumpToLine(line);
-        }
+        // Use jumpToRange (updated from jumpToLine to match your new Editor.js API)
+        if (editorRef.current && typeof editorRef.current.jumpToRange === 'function') {
+            editorRef.current.jumpToRange(rangeData);
+        } 
     };
 
     async function fetchData() {
@@ -95,7 +94,6 @@ export default function Home() {
                     );
                 })
                 .catch((error) => {
-                    console.error("Error fetching data:", error);
                     openNotification("error fetching .", "bottomRight");
                 });
         } else {
@@ -136,31 +134,51 @@ export default function Home() {
         } else if (key == "AST") {
             const res = lfortran_funcs.emit_ast_from_source(sourceCode);
             if (res) {
-                // 1. Convert to HTML first so tags aren't escaped
                 let htmlOutput = ansi_up.ansi_to_html(res);
                 
-                // 2. Inject the span into the HTML string
+                // Demo 1: Tag "Declaration" covering the integer parameter line (Line 2)
                 let finalOutput = htmlOutput.replace("Declaration",  
-                    `<span data-line="2" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Declaration</span>`
+                    `<span 
+                        data-start-line="2" data-start-col="5" 
+                        data-end-line="2" data-end-col="73" 
+                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                    >Declaration</span>`
                 );
+
+                // Demo 2: Tag "Subroutine" covering the subroutine definition (Line 9)
                 finalOutput = finalOutput.replace("Subroutine", 
-                    `<span data-line="9" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Subroutine</span>`
+                    `<span 
+                        data-start-line="9" data-start-col="9" 
+                        data-end-line="9" data-end-col="46" 
+                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                    >Subroutine</span>`
                 );
+                
                 setOutput(finalOutput);
             }
         } else if (key == "ASR") {
             const res = lfortran_funcs.emit_asr_from_source(sourceCode);
             if (res) {
-                // 1. Convert to HTML first
                 let htmlOutput = ansi_up.ansi_to_html(res);
 
-                // 2. Inject the span (Replacing "Declaration" as it's a common top-level node)
+                // Demo 1: Exact span for Declaration
                 let finalOutput = htmlOutput.replace("Declaration", 
-                    `<span data-line="2" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Declaration</span>`
+                    `<span 
+                        data-start-line="2" data-start-col="5" 
+                        data-end-line="2" data-end-col="73" 
+                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                    >Declaration</span>`
                 );
+
+                // Demo 2: Exact span for Subroutine
                 finalOutput = finalOutput.replace("Subroutine", 
-                    `<span data-line="9" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Subroutine</span>`
+                    `<span 
+                        data-start-line="9" data-start-col="9" 
+                        data-end-line="9" data-end-col="46" 
+                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                    >Subroutine</span>`
                 );
+                
                 setOutput(finalOutput);
             }
         } else if (key == "WAT") {

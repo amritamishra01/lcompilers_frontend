@@ -6,12 +6,10 @@ import React, { useState, useEffect } from 'react';
 import preinstalled_programs from "../utils/preinstalled_programs";
 import dynamic from 'next/dynamic'
 
-// 1. Keep your original dynamic import but rename it to DynamicEditor
 const Editor = dynamic(() => import('./Editor'), {
     ssr: false,
 });
 
-// Added editorRef to the destructured props
 function TextBox({ disabled, sourceCode, setSourceCode, exampleName, setExampleName, activeTab, handleUserTabChange, myHeight, editorRef }) {
     const isMobile = useIsMobile(); 
     const [isFullScreen, setIsFullScreen] = useState(false);
@@ -89,7 +87,7 @@ function TextBox({ disabled, sourceCode, setSourceCode, exampleName, setExampleN
                     <Editor
                         sourceCode={sourceCode}
                         setSourceCode={setSourceCode}
-                        editorRef={editorRef}// CRITICAL: Pass the ref to the Editor
+                        editorRef={editorRef}// Pass the ref to the Editor
                     />
                 </div>
             ),

@@ -9,26 +9,40 @@ import "ace-builds/src-noconflict/ext-language_tools";
 const Editor = ({ sourceCode, setSourceCode, editorRef }) => {
     const aceEditorRef = useRef(null);
 
-    // This useEffect manually attaches the jump function to the ref
-    // This bypasses the {retry: f} issue caused by Next.js dynamic imports
-    // Add this inside the Editor component function
     useEffect(() => {
         if (editorRef) {
-            // This forcefully overwrites the {retry: f} object
+            
             editorRef.current = {
-                jumpToLine(line) {
+                jumpToRange(rangeData) {
+
                     if (aceEditorRef.current) {
                         const editor = aceEditorRef.current.editor;
-                        
-                        // 1. Move cursor and scroll (Ace is 1-based)
-                        editor.gotoLine(line, 0, true);
+                        const ace = window.ace;
 
-                        // 2. Visually highlight by selecting the line
-                        editor.selection.moveCursorTo(line - 1, 0); 
-                        editor.selection.selectLine();
+                        if (ace) {
+                            const Range = ace.require("ace/range").Range;
+                            
+                            const startRow = rangeData.startLine - 1;
+                            const startCol = rangeData.startCol - 1;
+                            const endRow = rangeData.endLine - 1;
+                            const endCol = rangeData.endCol - 1;
 
-                        // 3. Focus the editor to show the highlight clearly
-                        editor.focus();
+                            // 1. Force scroll to the line first
+                            editor.scrollToLine(rangeData.startLine, true, true);
+
+                            // 2. Clear any existing cursor or selection to prevent conflicts
+                            editor.selection.clearSelection();
+
+                            // 3. Create and apply the precise range
+                            const newRange = new Range(startRow, startCol, endRow, endCol);
+                            editor.selection.setRange(newRange);
+
+                            // 4. Force focus and center the view on the highlight
+                            editor.focus();
+                            // Optional: helps if the code block is very long
+                            editor.renderer.scrollSelectionIntoView(); 
+                        } else {
+                        }
                     }
                 }
             };

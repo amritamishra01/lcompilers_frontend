@@ -4,21 +4,27 @@ import { Button } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 import { Segmented } from "antd";
 
-// Added onNodeClick to props
+//  onNodeClick to props
 function ResultBox({ activeTab, output, handleUserTabChange, myHeight, openNotification, onNodeClick }) {
     const isMobile = useIsMobile();
     const [showCopy, setShowCopy] = useState(false);
 
-    // Step 1: Handle clicks on the AST/ASR nodes
     const handleOutputClick = (e) => {
-        // 1. Get the attribute and the text of the element that was actually clicked
-        const line = e.target.getAttribute("data-line");
-        const clickedText = e.target.innerText;
+        //  .closest to handle nested spans
+        const target = e.target.closest("[data-start-line]");
+        
+        if (target) {
+            const rangeData = {
+                startLine: parseInt(target.getAttribute("data-start-line")),
+                startCol: parseInt(target.getAttribute("data-start-col")),
+                endLine: parseInt(target.getAttribute("data-end-line")),
+                endCol: parseInt(target.getAttribute("data-end-col"))
+            };
 
-        if (line && onNodeClick) {
-            onNodeClick(parseInt(line));
-        } else if (!line) {
-        }
+            if (onNodeClick) {
+                onNodeClick(rangeData);
+            } 
+        } 
     };
 
     function copyTextToClipboard(e) {
@@ -59,7 +65,7 @@ function ResultBox({ activeTab, output, handleUserTabChange, myHeight, openNotif
             <pre style={{ margin: "0px", height: myHeight, overflow: "scroll", border: "1px solid black" }}>
                 <div 
                     id="outputBox" 
-                    // Step 2: Attach the click listener to the container
+                    //  Attach the click listener to the container
                     onClick={handleOutputClick}
                     style={{ minHeight: "100%", fontSize: "0.9em", padding: "10px" }} 
                     dangerouslySetInnerHTML={{ __html: output }}
