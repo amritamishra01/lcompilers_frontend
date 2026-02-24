@@ -4,7 +4,7 @@ import LoadLFortran from "../components/LoadLFortran";
 import preinstalled_programs from "../utils/preinstalled_programs";
 import { useIsMobile } from "../components/useIsMobile";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react"; // Added useRef
 import { Col, Row, Spin } from "antd";
 import { notification } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -46,6 +46,10 @@ export default function Home() {
     const [activeTab, setActiveTab] = useState("STDOUT");
     const [output, setOutput] = useState("");
     const [dataFetch, setDataFetch] = useState(false);
+    
+    // Step 1: Initialize the Ref for the Editor
+    const editorRef = useRef(null); 
+
     const isMobile = useIsMobile();
 
     const myHeight = ((!isMobile) ? "calc(100vh - 170px)" : "calc(50vh - 85px)");
@@ -60,6 +64,15 @@ export default function Home() {
             handleUserTabChange("STDOUT");
         }
     }, [moduleReady, dataFetch]);
+
+    // Step 2: Jump Handler to be passed to ResultBox
+    const jumpToEditorLine = (line) => {
+        
+        // Use jumpToLine (the API we exposed in Editor.js)
+        if (editorRef.current && typeof editorRef.current.jumpToLine === 'function') {
+            editorRef.current.jumpToLine(line);
+        }
+    };
 
     async function fetchData() {
         const url = window.location.search;
@@ -109,7 +122,6 @@ export default function Home() {
             if (wasm_bytes_response) {
                 const [exit_code, ...compile_result] = wasm_bytes_response.split(",");
                 if (exit_code !== "0") {
-                     // print compile-time error found by lfortran to output
                     setOutput(ansi_up.ansi_to_html(compile_result) + `\nCompilation Time: ${duration_compile} ms`);
                 }
                 else {
@@ -124,12 +136,32 @@ export default function Home() {
         } else if (key == "AST") {
             const res = lfortran_funcs.emit_ast_from_source(sourceCode);
             if (res) {
-                setOutput(ansi_up.ansi_to_html(res));
+                // 1. Convert to HTML first so tags aren't escaped
+                let htmlOutput = ansi_up.ansi_to_html(res);
+                
+                // 2. Inject the span into the HTML string
+                let finalOutput = htmlOutput.replace("Declaration",  
+                    `<span data-line="2" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Declaration</span>`
+                );
+                finalOutput = finalOutput.replace("Subroutine", 
+                    `<span data-line="9" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Subroutine</span>`
+                );
+                setOutput(finalOutput);
             }
         } else if (key == "ASR") {
             const res = lfortran_funcs.emit_asr_from_source(sourceCode);
             if (res) {
-                setOutput(ansi_up.ansi_to_html(res));
+                // 1. Convert to HTML first
+                let htmlOutput = ansi_up.ansi_to_html(res);
+
+                // 2. Inject the span (Replacing "Declaration" as it's a common top-level node)
+                let finalOutput = htmlOutput.replace("Declaration", 
+                    `<span data-line="2" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Declaration</span>`
+                );
+                finalOutput = finalOutput.replace("Subroutine", 
+                    `<span data-line="9" style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;">Subroutine</span>`
+                );
+                setOutput(finalOutput);
             }
         } else if (key == "WAT") {
             const res = lfortran_funcs.emit_wat_from_source(sourceCode);
@@ -144,7 +176,6 @@ export default function Home() {
         } else if (key == "PY") {
             setOutput("Support for PY is not yet enabled");
         } else {
-            console.log("Unknown key:", key);
             setOutput("Unknown key: " + key);
         }
         setActiveTab(key);
@@ -171,6 +202,8 @@ export default function Home() {
                         activeTab={activeTab}
                         handleUserTabChange={handleUserTabChange}
                         myHeight={myHeight}
+                        // Step 4: Pass the editorRef to TextBox
+                        editorRef={editorRef} 
                     ></TextBox>
                 </Col>
                 <Col xs={{ span: 24 }} sm={{ span: 24 }} md={{ span: 12 }}>
@@ -181,6 +214,8 @@ export default function Home() {
                             handleUserTabChange={handleUserTabChange}
                             myHeight={myHeight}
                             openNotification={openNotification}
+                            // Step 5: Pass the jump handler to ResultBox
+                            onNodeClick={jumpToEditorLine} 
                         ></ResultBox>
                     ) : (
                         <div style={{height: myHeight}}>
