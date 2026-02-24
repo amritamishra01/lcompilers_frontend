@@ -11,37 +11,35 @@ const Editor = ({ sourceCode, setSourceCode, editorRef }) => {
 
     useEffect(() => {
         if (editorRef) {
-            
             editorRef.current = {
                 jumpToRange(rangeData) {
-
                     if (aceEditorRef.current) {
                         const editor = aceEditorRef.current.editor;
                         const ace = window.ace;
 
                         if (ace) {
+                            // Required for the selection to not be a solid block
+                            editor.setSelectionStyle("text"); 
+
                             const Range = ace.require("ace/range").Range;
                             
+                            // Convert 1-based metadata to 0-based Ace indexing
                             const startRow = rangeData.startLine - 1;
                             const startCol = rangeData.startCol - 1;
                             const endRow = rangeData.endLine - 1;
                             const endCol = rangeData.endCol - 1;
 
-                            // 1. Force scroll to the line first
-                            editor.scrollToLine(rangeData.startLine, true, true);
-
-                            // 2. Clear any existing cursor or selection to prevent conflicts
+                            // Clear existing selection to avoid visual ghosting
                             editor.selection.clearSelection();
 
-                            // 3. Create and apply the precise range
+                            // Apply the precise syntactic range
                             const newRange = new Range(startRow, startCol, endRow, endCol);
                             editor.selection.setRange(newRange);
 
-                            // 4. Force focus and center the view on the highlight
+                            // Navigation and Focus
+                            editor.scrollToLine(rangeData.startLine, true, true);
                             editor.focus();
-                            // Optional: helps if the code block is very long
-                            editor.renderer.scrollSelectionIntoView(); 
-                        } else {
+                            editor.renderer.scrollSelectionIntoView(newRange); 
                         }
                     }
                 }

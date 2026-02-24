@@ -149,7 +149,7 @@ export default function Home() {
                 finalOutput = finalOutput.replace("Subroutine", 
                     `<span 
                         data-start-line="9" data-start-col="9" 
-                        data-end-line="9" data-end-col="46" 
+                        data-end-line="12" data-end-col="23"
                         style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
                     >Subroutine</span>`
                 );
@@ -171,10 +171,10 @@ export default function Home() {
                 );
 
                 // Demo 2: Exact span for Subroutine
-                finalOutput = finalOutput.replace("Subroutine", 
+                finalOutput = finalOutput.replace("Subroutine",
                     `<span 
                         data-start-line="9" data-start-col="9" 
-                        data-end-line="9" data-end-col="46" 
+                        data-end-line="12" data-end-col="23" 
                         style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
                     >Subroutine</span>`
                 );
