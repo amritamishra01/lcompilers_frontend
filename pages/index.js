@@ -4,7 +4,7 @@ import LoadLFortran from "../components/LoadLFortran";
 import preinstalled_programs from "../utils/preinstalled_programs";
 import { useIsMobile } from "../components/useIsMobile";
 
-import { useState, useEffect, useRef } from "react"; // Added useRef
+import { useState, useEffect, useRef } from "react";
 import { Col, Row, Spin } from "antd";
 import { notification } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
@@ -47,7 +47,7 @@ export default function Home() {
     const [output, setOutput] = useState("");
     const [dataFetch, setDataFetch] = useState(false);
     
-    // Step 1: Initialize the Ref for the Editor
+    // Initialize the Ref for the Editor
     const editorRef = useRef(null); 
 
     const isMobile = useIsMobile();
@@ -64,7 +64,7 @@ export default function Home() {
             handleUserTabChange("STDOUT");
         }
     }, [moduleReady, dataFetch]);
-    // Step 2: Jump Handler to be passed to ResultBox
+    // Jump Handler to be passed to ResultBox
     const jumpToEditorLine = (rangeData) => {
         
         // Use jumpToRange (updated from jumpToLine to match your new Editor.js API)
@@ -134,50 +134,48 @@ export default function Home() {
         } else if (key == "AST") {
             const res = lfortran_funcs.emit_ast_from_source(sourceCode);
             if (res) {
-                let htmlOutput = ansi_up.ansi_to_html(res);
-                
-                // Demo 1: Tag "Declaration" covering the integer parameter line (Line 2)
-                let finalOutput = htmlOutput.replace("Declaration",  
+            const htmlOutput = ansi_up.ansi_to_html(res);
+            
+            // Regex /g ensures all instances become interactive
+            const finalOutput = htmlOutput
+                .replace(/Declaration/g,  
                     `<span 
                         data-start-line="2" data-start-col="5" 
                         data-end-line="2" data-end-col="73" 
                         style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
                     >Declaration</span>`
-                );
-
-                // Demo 2: Tag "Subroutine" covering the subroutine definition (Line 9)
-                finalOutput = finalOutput.replace("Subroutine", 
+                )
+                .replace(/Subroutine/g, 
                     `<span 
                         data-start-line="9" data-start-col="9" 
                         data-end-line="12" data-end-col="23"
                         style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
                     >Subroutine</span>`
                 );
-                
-                setOutput(finalOutput);
-            }
+            
+            setOutput(finalOutput);
+        }
         } else if (key == "ASR") {
             const res = lfortran_funcs.emit_asr_from_source(sourceCode);
             if (res) {
-                let htmlOutput = ansi_up.ansi_to_html(res);
+                const htmlOutput = ansi_up.ansi_to_html(res);
 
-                // Demo 1: Exact span for Declaration
-                let finalOutput = htmlOutput.replace("Declaration", 
-                    `<span 
-                        data-start-line="2" data-start-col="5" 
-                        data-end-line="2" data-end-col="73" 
-                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
-                    >Declaration</span>`
-                );
-
-                // Demo 2: Exact span for Subroutine
-                finalOutput = finalOutput.replace("Subroutine",
-                    `<span 
-                        data-start-line="9" data-start-col="9" 
-                        data-end-line="12" data-end-col="23" 
-                        style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
-                    >Subroutine</span>`
-                );
+                // Using global regex (/g) ensures all instances are captured
+                const finalOutput = htmlOutput
+                    .replace(/Declaration/g, 
+                        `<span 
+                            data-start-line="2" data-start-col="5" 
+                            data-end-line="2" data-end-col="73" 
+                            style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                        >Declaration</span>`
+                    )
+                    .replace(/Subroutine/g,
+                        `<span 
+                            data-start-line="9" data-start-col="9" 
+                            data-end-line="12" data-end-col="23" 
+                            style="color: #1890ff; cursor: pointer; font-weight: bold; text-decoration: underline;"
+                        >Subroutine</span>`
+                    );
                 
                 setOutput(finalOutput);
             }
@@ -206,7 +204,7 @@ export default function Home() {
                 setModuleReady={setModuleReady}
                 lfortran_funcs={lfortran_funcs}
                 openNotification={openNotification}
-                myPrint={setOutput}
+                CustomPrint={setOutput}
             ></LoadLFortran>
 
             <Row gutter={[16, 16]}>
@@ -220,7 +218,7 @@ export default function Home() {
                         activeTab={activeTab}
                         handleUserTabChange={handleUserTabChange}
                         myHeight={myHeight}
-                        // Step 4: Pass the editorRef to TextBox
+                        // Pass the editorRef to TextBox
                         editorRef={editorRef} 
                     ></TextBox>
                 </Col>
@@ -232,7 +230,7 @@ export default function Home() {
                             handleUserTabChange={handleUserTabChange}
                             myHeight={myHeight}
                             openNotification={openNotification}
-                            // Step 5: Pass the jump handler to ResultBox
+                            //Pass the jump handler to ResultBox
                             onNodeClick={jumpToEditorLine} 
                         ></ResultBox>
                     ) : (
