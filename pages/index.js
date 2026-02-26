@@ -52,19 +52,15 @@ export default function Home() {
         try {
             const params = new URLSearchParams(window.location.search);
             if (params.get("code") || params.get("gist")) {
-                console.log("%c[Load] URL Params detected, skipping localStorage", "color: orange");
                 return "";
             }
 
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
-                console.log("%c[Load] Found code in localStorage", "color: green");
                 return saved;
             }
-            console.log("%c[Load] No saved code, using Fallback", "color: gray");
             return FALLBACK_CODE;
         } catch (e) {
-            console.error("[Load] Error reading from localStorage:", e);
             return FALLBACK_CODE;
         }
     });
@@ -79,7 +75,6 @@ export default function Home() {
 
     // 2. Fetch Data Hook (Fixed: Removed setSourceCode("") overwrite)
     useEffect(() => {
-        console.log("%c[Lifecycle] Home Mounted, triggering fetchData", "color: blue");
         fetchData();
     }, []);
 
@@ -98,7 +93,6 @@ export default function Home() {
             try {
                 if (sourceCode && sourceCode !== FALLBACK_CODE) {
                     localStorage.setItem(STORAGE_KEY, sourceCode);
-                    console.log("%c[Save] Code persisted to localStorage", "color: cyan");
                 }
             } catch (e) {
                 console.warn("[Save] Write error:", e);
@@ -114,11 +108,9 @@ export default function Home() {
         const urlParams = new URLSearchParams(url);
 
         if (urlParams.get("code")) {
-            console.log("[Fetch] Loading from URL code param");
             setSourceCode(decodeURIComponent(urlParams.get("code")));
             setDataFetch(true);
         } else if (urlParams.get("gist")) {
-            console.log("[Fetch] Loading from Gist");
             const gistUrl = gist + urlParams.get("gist") + "/raw/";
             fetch(gistUrl, {cache: "no-store"})
                 .then((response) => response.text())
@@ -134,7 +126,6 @@ export default function Home() {
         } else {
             // Only set Fallback if state is currently empty (avoids overwriting LocalStorage load)
             if (!sourceCode || sourceCode === "") {
-                console.log("[Fetch] No saved state, setting Mandelbrot");
                 setSourceCode(FALLBACK_CODE);
             }
             setDataFetch(true);
