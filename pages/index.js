@@ -1,7 +1,6 @@
 import TextBox from "../components/TextBox";
 import ResultBox from "../components/ResultBox";
 import LoadLFortran from "../components/LoadLFortran";
-import preinstalled_programs from "../utils/preinstalled_programs";
 import { useIsMobile } from "../components/useIsMobile";
 
 import { useState, useEffect } from "react";
@@ -9,6 +8,12 @@ import { Col, Row, Spin } from "antd";
 import { notification } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import AnsiUp from "ansi_up";
+import { Select } from "antd";
+const { Option, OptGroup } = Select;
+// Before: import preinstalled_programs from "../utils/preinstalled_programs";
+// After: Import BOTH the default and the named exports
+// Combined Import: Fixes the naming conflict and Redefinition Error
+import preinstalled_programs, { CATEGORIZED_PROGRAMS, ALL_PROGRAMS } from "../utils/preinstalled_programs";
 
 var ansi_up = new AnsiUp();
 
@@ -61,6 +66,22 @@ export default function Home() {
         }
     }, [moduleReady, dataFetch]);
 
+    const handleExampleChange = (id) => {
+        const selected = ALL_PROGRAMS.find(p => p.id === id);
+        
+        if (!selected) {
+            return;
+        }
+
+        // Surgical update: Change the code and clear the URL
+        setSourceCode(selected.code);
+
+        // Reset URL if parameters exist to ensure the new example is the "active" code
+        if (window.location.search) {
+            window.history.replaceState({}, "", window.location.pathname);
+        }
+    };
+
     async function fetchData() {
         const url = window.location.search;
         const gist = "https://gist.githubusercontent.com/";
@@ -82,13 +103,14 @@ export default function Home() {
                     );
                 })
                 .catch((error) => {
-                    console.error("Error fetching data:", error);
                     openNotification("error fetching .", "bottomRight");
                 });
         } else {
-            setSourceCode(preinstalled_programs.basic.mandelbrot);
+            // Pulling from the new registry structure
+            setSourceCode(CATEGORIZED_PROGRAMS["Basic"][0].code);
             setDataFetch(true);
-            if(urlParams.size>0){
+            
+            if(urlParams.size > 0){
                 openNotification("The URL contains an invalid parameter.", "bottomRight");
             }
         }
@@ -144,7 +166,6 @@ export default function Home() {
         } else if (key == "PY") {
             setOutput("Support for PY is not yet enabled");
         } else {
-            console.log("Unknown key:", key);
             setOutput("Unknown key: " + key);
         }
         setActiveTab(key);
@@ -171,6 +192,8 @@ export default function Home() {
                         activeTab={activeTab}
                         handleUserTabChange={handleUserTabChange}
                         myHeight={myHeight}
+                        handleExampleChange={handleExampleChange}
+                        CATEGORIZED_PROGRAMS={CATEGORIZED_PROGRAMS}
                     ></TextBox>
                 </Col>
                 <Col xs={{ span: 24 }} sm={{ span: 24 }} md={{ span: 12 }}>

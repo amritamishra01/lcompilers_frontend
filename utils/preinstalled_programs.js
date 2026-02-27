@@ -788,4 +788,20 @@ end program`
     }
 }
 
+// 1. Export as a categorized registry for the UI Menu
+export const CATEGORIZED_PROGRAMS = {
+    "Basic": [
+        { id: "mandelbrot", name: "Mandelbrot", code: preinstalled_programs.basic.mandelbrot },
+        { id: "expr2", name: "Simple Expression", code: preinstalled_programs.basic.expr2 }
+    ],
+    "Experimental (Generics)": [
+        { id: "template_add", name: "Template Add", code: preinstalled_programs.experimental.template_add },
+        { id: "template_nested", name: "Nested Templates", code: preinstalled_programs.experimental.template_nested },
+        { id: "template_array_04", name: "Array Reverse", code: preinstalled_programs.experimental.template_array_04 }
+    ]
+};
+
+// 2. Pre-flattened for efficient selection logic
+export const ALL_PROGRAMS = Object.values(CATEGORIZED_PROGRAMS).flat();
+
 export default preinstalled_programs;
