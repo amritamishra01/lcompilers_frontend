@@ -28,12 +28,10 @@ function TextBox({ disabled, sourceCode, setSourceCode, exampleName, setExampleN
         }
     };
 
-    // 2. Updated mapping logic using the correctly named prop
     const menu_items = Object.entries(CATEGORIZED_PROGRAMS || {}).map(([category, programs]) => {
         return {
             key: category,
             label: category,
-            type: 'group',
             children: (programs || []).map(prog => ({
                 key: prog.id,
                 label: prog.name,

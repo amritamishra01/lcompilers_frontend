@@ -10,9 +10,6 @@ import { LoadingOutlined } from "@ant-design/icons";
 import AnsiUp from "ansi_up";
 import { Select } from "antd";
 const { Option, OptGroup } = Select;
-// Before: import preinstalled_programs from "../utils/preinstalled_programs";
-// After: Import BOTH the default and the named exports
-// Combined Import: Fixes the naming conflict and Redefinition Error
 import preinstalled_programs, { CATEGORIZED_PROGRAMS, ALL_PROGRAMS } from "../utils/preinstalled_programs";
 
 var ansi_up = new AnsiUp();
@@ -73,7 +70,6 @@ export default function Home() {
             return;
         }
 
-        // Surgical update: Change the code and clear the URL
         setSourceCode(selected.code);
 
         // Reset URL if parameters exist to ensure the new example is the "active" code
