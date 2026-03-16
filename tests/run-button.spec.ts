@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('run button triggers execution', async ({ page }) => {
-  await page.goto('http://localhost:3000');
+  await page.goto('/');
 
   const runButton = page.getByRole('button', { name: 'Run' });
 
