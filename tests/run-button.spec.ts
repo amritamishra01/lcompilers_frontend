@@ -5,15 +5,15 @@ test('run button triggers execution', async ({ page }) => {
 
   const runButton = page.getByRole('button', { name: 'Run' });
 
-  // Ensure Run button exists
-  await expect(runButton).toBeVisible();
+  // Wait until button becomes enabled
+  await expect(runButton).toBeEnabled({ timeout: 20000 });
 
   // Click Run
   await runButton.click();
 
-  // Wait briefly for execution
+  // Small wait for execution
   await page.waitForTimeout(2000);
 
-  // Ensure page is still functional
+  // Ensure UI still stable
   await expect(runButton).toBeVisible();
 });
